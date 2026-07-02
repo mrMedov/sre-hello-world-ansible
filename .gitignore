@@ -1,0 +1,10 @@
+*.retry
+.vault_pass
+.env
+.venv/
+__pycache__/
+.idea/
+.vscode/
+.venv
+
+inventories/*/group_vars/vault.yml

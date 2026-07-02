@@ -1,0 +1,34 @@
+---
+- name: Checkout application repository
+  ansible.builtin.git:
+    repo: "{{ app_repo_url }}"
+    dest: "{{ app_root }}"
+    version: "{{ app_git_ref }}"
+    force: true
+  register: app_git_checkout
+
+- name: Render application environment file
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ app_root }}/.env"
+    owner: root
+    group: root
+    mode: "0600"
+  register: app_env_file
+
+- name: Render production docker compose file
+  ansible.builtin.template:
+    src: docker-compose.prod.yml.j2
+    dest: "{{ app_root }}/docker-compose.prod.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  register: app_compose_file
+
+- name: Rebuild and restart PHP application container
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_root }}"
+    files:
+      - docker-compose.prod.yml
+    build: always
+    state: present

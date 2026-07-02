@@ -1,0 +1,12 @@
+---
+- name: Deploy sre-hello-world production stack
+  hosts: sre_app
+  become: true
+  gather_facts: true
+
+  roles:
+    - common
+    - docker
+    - postgresql
+    - app
+    - nginx

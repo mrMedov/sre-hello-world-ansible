@@ -1,0 +1,56 @@
+---
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+
+- name: Deploy main Nginx configuration
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload Nginx
+
+- name: Deploy application Nginx defaults
+  ansible.builtin.template:
+    src: app-defaults.j2
+    dest: /etc/nginx/app-defaults
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload Nginx
+
+- name: Deploy application virtual host
+  ansible.builtin.template:
+    src: sre-hello-world.conf.j2
+    dest: /etc/nginx/sites-available/sre-hello-world.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload Nginx
+
+- name: Enable application virtual host
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/sre-hello-world.conf
+    dest: /etc/nginx/sites-enabled/sre-hello-world.conf
+    state: link
+  notify: Reload Nginx
+
+- name: Remove default virtual host
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload Nginx
+
+- name: Validate Nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Ensure Nginx is enabled and running
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

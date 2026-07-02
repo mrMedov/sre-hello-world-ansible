@@ -1,0 +1,17 @@
+---
+services:
+  {{ php_service_name }}:
+    container_name: {{ php_service_name }}
+    build:
+      context: ./docker/images/php
+      dockerfile: Dockerfile
+    working_dir: /var/www/sre
+    volumes:
+      - {{ app_root }}:/var/www/sre:ro
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:{{ php_container_port }}:9000"
+    restart: unless-stopped

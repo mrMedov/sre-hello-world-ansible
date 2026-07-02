@@ -1,0 +1,11 @@
+# Managed by Ansible
+
+listen_addresses = '*'
+port = {{ postgres_port }}
+
+max_connections = {{ postgres_max_connections }}
+
+shared_buffers = {{ postgres_shared_buffers_mb }}MB
+effective_cache_size = {{ postgres_effective_cache_size_mb }}MB
+work_mem = {{ postgres_work_mem_mb }}MB
+maintenance_work_mem = {{ postgres_maintenance_work_mem_mb }}MB

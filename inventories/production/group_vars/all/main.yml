@@ -1,0 +1,20 @@
+---
+timezone: Asia/Novosibirsk
+
+common_packages:
+  - curl
+  - git
+  - vim
+  - python3
+  - python3-apt
+  - acl
+
+docker_dependencies:
+  - ca-certificates
+  - curl
+  - gnupg
+
+postgres_packages:
+  - postgresql
+  - postgresql-contrib
+  - python3-psycopg2

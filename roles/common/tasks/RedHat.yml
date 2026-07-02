@@ -1,0 +1,6 @@
+---
+- name: Fail for unsupported RedHat family
+  ansible.builtin.fail:
+    msg: >
+      RedHat-based distributions are not supported yet.
+      This playbook currently supports Debian family only.

@@ -1,0 +1,71 @@
+---
+- name: Install PostgreSQL packages
+  ansible.builtin.apt:
+    name: "{{ postgres_packages }}"
+    state: present
+    update_cache: true
+
+- name: Ensure PostgreSQL service is enabled and running
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Create PostgreSQL user
+  community.postgresql.postgresql_user:
+    name: "{{ postgres_user }}"
+    password: "{{ postgres_password }}"
+    role_attr_flags: LOGIN
+  become_user: postgres
+
+- name: Create PostgreSQL database
+  community.postgresql.postgresql_db:
+    name: "{{ postgres_db }}"
+    owner: "{{ postgres_user }}"
+    encoding: UTF8
+  become_user: postgres
+
+- name: Deploy PostgreSQL configuration
+  ansible.builtin.template:
+    src: postgresql.conf.j2
+    dest: "/etc/postgresql/{{ postgres_version }}/main/conf.d/99-sre-hello-world.conf"
+    owner: postgres
+    group: postgres
+    mode: "0644"
+  notify: Restart PostgreSQL
+
+- name: Deploy pg_hba.conf
+  ansible.builtin.template:
+    src: pg_hba.conf.j2
+    dest: "/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf"
+    owner: postgres
+    group: postgres
+    mode: "0640"
+  notify: Restart PostgreSQL
+
+- name: Create author table
+  community.postgresql.postgresql_query:
+    login_user: "{{ postgres_user }}"
+    login_password: "{{ postgres_password }}"
+    login_host: localhost
+    login_db: "{{ postgres_db }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS author (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100)
+      );
+
+- name: Insert default authors
+  community.postgresql.postgresql_query:
+    login_user: "{{ postgres_user }}"
+    login_password: "{{ postgres_password }}"
+    login_host: localhost
+    login_db: "{{ postgres_db }}"
+    query: |
+      INSERT INTO author (name)
+      SELECT 'John'
+      WHERE NOT EXISTS (SELECT 1 FROM author WHERE name = 'John');
+
+      INSERT INTO author (name)
+      SELECT 'Alex'
+      WHERE NOT EXISTS (SELECT 1 FROM author WHERE name = 'Alex');

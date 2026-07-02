@@ -1,0 +1,25 @@
+# Managed by Ansible
+# Based on original docker/hosts/app-defaults
+
+listen 80;
+root {{ app_root }}/web;
+
+location / {
+    try_files $uri /app.php$is_args$args;
+}
+
+location ~ ^/app\.php(/|$) {
+    fastcgi_pass 127.0.0.1:{{ php_container_port }};
+    fastcgi_split_path_info ^(.+\.php)(/.*)$;
+    fastcgi_read_timeout 240s;
+    include fastcgi_params;
+
+    fastcgi_param SCRIPT_FILENAME /var/www/sre/web$fastcgi_script_name;
+    fastcgi_param DOCUMENT_ROOT /var/www/sre/web;
+
+    internal;
+}
+
+location ~ \.php$ {
+    return 404;
+}

@@ -1,0 +1,11 @@
+---
+- name: Deploy sre-hello-world application
+  hosts: sre_app
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Deploy application
+      ansible.builtin.import_role:
+        name: app
+        tasks_from: deploy
